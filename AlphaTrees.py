@@ -1,17 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# # Project 7: Combine Signals for Enhanced Alpha
-# ## Instructions
-# Each problem consists of a function to implement and instructions on how to implement the function.  The parts of the function that need to be implemented are marked with a `# TODO` comment. After implementing the function, run the cell to test it against the unit tests we've provided. For each problem, we provide one or more unit tests from our `project_tests` package. These unit tests won't tell you if your answer is correct, but will warn you of any major errors. Your code will be checked for the correct solution when you submit it to Udacity.
-# 
-# ## Packages
-# When you implement the functions, you'll only need to you use the packages you've used in the classroom, like [Pandas](https://pandas.pydata.org/) and [Numpy](http://www.numpy.org/). These packages will be imported for you. We recommend you don't add any import statements, otherwise the grader might not be able to run your code.
-# 
-# The other packages that we're importing are `project_helper` and `project_tests`. These are custom packages built to help you solve the problems.  The `project_helper` module contains utility functions and graph functions. The `project_tests` contains the unit tests for all the problems.
-# 
 # ### Install Packages
-
 # In[ ]:
 
 
@@ -352,15 +340,6 @@ plt.title('Rolling Autocorrelation of Labels Shifted 1,2,3,4 Days')
 plt.show()
 
 
-# ### Question: What do you observe in the rolling autocorrelation of labels shifted?
-# *#TODO: Put Answer In this Cell*
-# 
-# They are identically distributed, but also independent from each other. 
-
-# ### Train/Valid/Test Splits
-# Now let's split the data into a train, validation, and test dataset. Implement the function `train_valid_test_split` to split the input samples, `all_x`, and targets values, `all_y` into a train, validation, and test dataset. The proportion sizes are `train_size`, `valid_size`, `test_size` respectively.
-# 
-# When splitting, make sure the data is in order from train, validation, and test respectivly. Say `train_size` is 0.7, `valid_size` is 0.2, and `test_size` is 0.1. The first 70 percent of `all_x` and `all_y` would be the train set. The next 20 percent of `all_x` and `all_y` would be the validation set. The last 10 percent of `all_x` and `all_y` would be the test set. Make sure not split a day between multiple datasets. It should be contained within a single dataset.
 
 # In[ ]:
 
@@ -407,42 +386,6 @@ def train_valid_test_split(all_x, all_y, train_size, valid_size, test_size):
     set_x = int(len(all_x) * train_size)
     set_xv = int(len(all_x) * valid_size) + set_x
     set_xt = int(len(all_x) * test_size) + set_xv
-    '''x_train = pd.DataFrame()
-    x_valid = pd.DataFrame()
-    x_test = pd.DataFrame()
-    xdate = all_x.index.levels[0].tolist()
-    set_x = int(len(xdate) * train_size)
-    set_xv = int(len(xdate) * valid_size) + set_x
-    set_xt = int(len(xdate) * test_size) + set_xv
-    for x in all_x.iterrows():
-        if x_mark < set_x:
-            x_train = x_train.append(all_x.loc[[xdate[x_mark]]])
-            x_mark += 1
-        elif x_mark < set_xv:
-            x_valid = x_valid.append(all_x.loc[[xdate[x_mark]]])
-            x_mark += 1
-        elif x_mark < set_xt:
-            x_test = x_test.append(all_x.loc[[xdate[x_mark]]])
-            x_mark += 1
-    
-    y_mark = 0
-    y_train = pd.Series()
-    y_valid = pd.Series()
-    y_test = pd.Series()
-    ydate = all_y.index.levels[0].tolist()
-    set_y = int(len(ydate) * train_size)
-    set_yv = int(len(ydate) * valid_size) + set_y
-    set_yt = int(len(ydate) * test_size) + set_yv
-    for y in all_y:
-        if y_mark < set_y:
-            y_train = y_train.append(all_y.loc[[ydate[y_mark]]])
-            y_mark += 1
-        elif y_mark < set_yv:
-            y_valid = y_valid.append(all_y.loc[[ydate[y_mark]]])
-            y_mark += 1
-        elif y_mark < set_yt:
-            y_test = y_test.append(all_y.loc[[ydate[y_mark]]])
-            y_mark += 1'''
     for x in all_x.iterrows():
         if x_mark <= set_x:
             x_train = pd.DataFrame(all_x[:x_mark])
@@ -521,18 +464,6 @@ display(project_helper.plot_tree_classifier(simple_clf, feature_names=features))
 project_helper.rank_features_by_importance(simple_clf.feature_importances_, features)
 
 
-# ### Question: Why does dispersion_20d have the highest feature importance, when the first split is on the Momentum_1YR feature?
-# All dispersion_20d values are extremely small, making them seemily more accurate then momentum_1yr which has a very large amount. The smaller the value for each feature, the more Importance it seems to have in this dataset. 
-# 
-
-# ### Train Random Forests with Different Tree Sizes
-# Let's build models using different tree sizes to find the model that best generalizes.
-# #### Parameters
-# When building the models, we'll use the following parameters.
-
-# In[ ]:
-
-
 n_days = 10
 n_stocks = 500
 
@@ -545,12 +476,7 @@ clf_parameters = {
 n_trees_l = [50, 100, 250, 500, 1000]
 
 
-# Recall from the lesson, that we’ll choose a min_samples_leaf parameter to be small enough to allow the tree to fit the data with as much detail as possible, but not so much that it overfits.  We can first propose 500, which is the number of assets in the estimation universe. Since we have about 500 stocks in the stock universe, we’ll want at least 500 stocks in a leaf for the leaf to make a prediction that is representative.  It’s common to multiply this by 2,3,5 or 10, so we’d have min samples leaf of 500, 1000, 1500, 2500, and 5000. If we were to try these values, we’d notice that the model is “too good to be true” on the training data.  A good rule of thumb for what is considered “too good to be true”, and therefore a sign of overfitting, is if the sharpe ratio is greater than 4.  Based on this, we recommend using min_sampes_leaf of 10 * 500, or 5,000.
-# 
-# Feel free to try other values for these parameters, but also keep in mind that making too many small adjustments to hyper-parameters can lead to overfitting even the validation data, and therefore lead to less generalizable performance on the out-of-sample test set.  So when trying different parameter values, choose values that are different enough in scale (i.e. 10, 20, 100 instead of 10,11,12).
-# 
 
-# In[ ]:
 
 
 from sklearn.ensemble import RandomForestClassifier
@@ -677,22 +603,6 @@ show_sample_results(all_factors, X_train, clf, factor_names)
 show_sample_results(all_factors, X_valid, clf, factor_names)
 
 
-# So that's pretty extraordinary. Even when the input factor returns are sideways to down, the AI Alpha is positive with Sharpe Ratio > 2. If we hope that this model will perform well in production we need to correct though for the non-IID labels and mitigate likely overfitting.
-
-# ## Overlapping Samples
-# Let's fix this by removing overlapping samples. We can do a number of things:
-# 
-# - Don't use overlapping samples
-# - Use BaggingClassifier's `max_samples`
-# - Build an ensemble of non-overlapping trees
-# 
-# In this project, we'll do all three methods and compare.
-# ### Drop Overlapping Samples
-# This is the simplest of the three methods. We'll just drop any overlapping samples from the dataset. Implement the `non_overlapping_samples` function to return a new dataset overlapping samples. 
-
-# In[ ]:
-
-
 def non_overlapping_samples(x, y, n_skip_samples, start_i=0):
     """
     Get the non overlapping samples.
@@ -742,9 +652,6 @@ def non_overlapping_samples(x, y, n_skip_samples, start_i=0):
 project_tests.test_non_overlapping_samples(non_overlapping_samples)
 
 
-# With the dataset created without overlapping samples, lets train a new model and look at the results.
-
-# #### Train Model
 
 # In[ ]:
 
@@ -779,11 +686,6 @@ project_helper.plot(
 
 show_sample_results(all_factors, X_valid, clf, factor_names)
 
-
-# This looks better, but we are throwing away a lot of information by taking every 5th row.
-
-# ### Use BaggingClassifier's `max_samples`
-# In this method, we'll set `max_samples` to be on the order of the average uniqueness of the labels. Since  `RandomForrestClassifier` does not take this param, we're using `BaggingClassifier`. Implement `bagging_classifier` to build the bagging classifier.
 
 # In[ ]:
 
@@ -830,12 +732,6 @@ def bagging_classifier(n_estimators, max_samples, max_features, parameters):
 project_tests.test_bagging_classifier(bagging_classifier)
 
 
-# With the bagging classifier built, lets train a new model and look at the results.
-# #### Train Model
-
-# In[ ]:
-
-
 train_score = []
 valid_score = []
 oob_score = []
@@ -866,16 +762,6 @@ project_helper.plot(
 
 
 show_sample_results(all_factors, X_valid, clf, factor_names)
-
-
-# This seems much "better" in the sense that we have much better fidelity between the three.
-# 
-
-# ### Build an ensemble of non-overlapping trees
-# The last method is to create ensemble of non-overlapping trees. Here we are going to write a custom `scikit-learn` estimator. We inherit from `VotingClassifier` and we override the `fit` method so we fit on non-overlapping periods.
-
-# In[ ]:
-
 
 import abc
 
@@ -914,12 +800,6 @@ class NoOverlapVoterAbstract(VotingClassifier):
         return self
 
 
-# You might notice that two of the functions are abstracted. These will be the functions that you need to implement.
-# #### OOB Score
-# In order to get the correct OOB score, we need to take the average of all the estimator's OOB scores. Implement `calculate_oob_score` to calculate this score.
-
-# In[ ]:
-
 
 def calculate_oob_score(classifiers):
     """
@@ -953,11 +833,6 @@ def calculate_oob_score(classifiers):
 
 project_tests.test_calculate_oob_score(calculate_oob_score)
 
-
-# #### Non Overlapping Estimators
-# With `calculate_oob_score` implemented, let's create non overlapping estimators. Implement `non_overlapping_estimators` to build non overlapping subsets of the data, then run a estimator on each subset of data.
-
-# In[ ]:
 
 
 def non_overlapping_estimators(x, y, classifiers, n_skip_samples):
@@ -998,22 +873,12 @@ def non_overlapping_estimators(x, y, classifiers, n_skip_samples):
 project_tests.test_non_overlapping_estimators(non_overlapping_estimators)
 
 
-# In[ ]:
-
-
 class NoOverlapVoter(NoOverlapVoterAbstract):
     def _calculate_oob_score(self, classifiers):
         return calculate_oob_score(classifiers)
         
     def _non_overlapping_estimators(self, x, y, classifiers, n_skip_samples):
         return non_overlapping_estimators(x, y, classifiers, n_skip_samples)
-
-
-# Now that we have our `NoOverlapVoter` class, let's train it.
-
-# #### Train Model
-
-# In[ ]:
 
 
 train_score = []
@@ -1031,11 +896,6 @@ for n_trees in tqdm(n_trees_l, desc='Training Models', unit='Model'):
     oob_score.append(clf_nov.oob_score_)
 
 
-# #### Results
-
-# In[ ]:
-
-
 project_helper.plot(
     [n_trees_l]*3,
     [train_score, valid_score, oob_score],
@@ -1043,19 +903,7 @@ project_helper.plot(
     'Random Forrest Accuracy',
     'Number of Trees')
 
-
-# In[ ]:
-
-
 show_sample_results(all_factors, X_valid, clf_nov, factor_names)
-
-
-# ## Final Model
-# ### Re-Training Model
-# In production, we would roll forward the training. Typically you would re-train up to the "current day" and then test. Here, we will train on the train & validation dataset.
-
-# In[ ]:
-
 
 n_trees = 500
 
@@ -1065,44 +913,17 @@ clf_nov.fit(
     pd.concat([X_train, X_valid]),
     pd.concat([y_train, y_valid]))
 
-
-# ### Results
-# #### Accuracy
-
-# In[ ]:
-
-
 print('train: {}, oob: {}, valid: {}'.format(
     clf_nov.score(X_train, y_train.values),
     clf_nov.score(X_valid, y_valid.values),
     clf_nov.oob_score_))
 
 
-# #### Train
-
-# In[ ]:
-
-
 show_sample_results(all_factors, X_train, clf_nov, factor_names)
-
-
-# #### Validation
-
-# In[ ]:
 
 
 show_sample_results(all_factors, X_valid, clf_nov, factor_names)
 
-
-# #### Test
-
-# In[ ]:
-
-
 show_sample_results(all_factors, X_test, clf_nov, factor_names)
 
 
-# So, hopefully you are appropriately amazed by this. Despite the significant differences between the factor performances in the three sets, the AI APLHA is able to deliver positive performance.
-
-# ## Submission
-# Now that you're done with the project, it's time to submit it. Click the submit button in the bottom right. One of our reviewers will give you feedback on your project with a pass or not passed grade. You can continue to the next section while you wait for feedback.
